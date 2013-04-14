@@ -22,6 +22,9 @@ get(Name, Object) ->
     _ -> undefined
   end.
 
+unset([], Object) -> Object;
+unset([Name | Rest], Object) ->
+  unset(Rest, unset(Name, Object));
 unset(Name, Object) ->
   dict:erase(Name, Object).
 
