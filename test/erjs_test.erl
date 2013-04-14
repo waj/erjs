@@ -56,3 +56,9 @@ global_eval_test() ->
   {_, Global2} = erjs:eval("a += 5", Global),
   ?assertEqual([{a, 10}], erjs_object:to_list(Global2)).
 
+global_delete_test() ->
+  Global = erjs_object:new([{a, 1}, {b, 2}]),
+  Global2 = erjs_object:unset(a, Global),
+  Global3 = erjs_object:unset(c, Global2),
+  ?assertEqual([{b, 2}], erjs_object:to_list(Global3)).
+

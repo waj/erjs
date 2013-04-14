@@ -1,5 +1,5 @@
 -module(erjs_object).
--export([new/0, new/1, get/2, set/3, to_list/1]).
+-export([new/0, new/1, get/2, set/3, unset/2, to_list/1]).
 
 new() ->
   dict:new().
@@ -21,6 +21,9 @@ get(Name, Object) ->
     {ok, Value} -> Value;
     _ -> undefined
   end.
+
+unset(Name, Object) ->
+  dict:erase(Name, Object).
 
 to_list(Object) ->
   dict:to_list(Object).
