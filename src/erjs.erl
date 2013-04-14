@@ -44,6 +44,18 @@ run({op, 'cond', Expr, Then, Else}, C) ->
   end,
   run(Next, C1);
 
+run({op, {typeof, _}, Expr}, C) ->
+  {Value, C1} = run(Expr, C),
+  Type = case Value of
+    true -> "boolean";
+    false -> "boolean";
+    undefined -> "undefined";
+    _ when is_number(Value) -> "number";
+    _ when is_list(Value) -> "string";
+    _ -> "object"
+  end,
+  {Type, C1};
+
 run({'if', Expr, Then}, C) ->
   run({ifelse, Expr, Then, []}, C);
 

@@ -25,7 +25,13 @@ cases() -> [
   {"foo = 1; foo ? foo : 2", 1, [{foo, 1}]},
   {"if (1 > 2) { a = 123 }", undefined, []},
   {"if (1 < 2) { a = 123 }", undefined, [{a,123}]},
-  {"if (2 < 1) { a = 123 } else { a = 321 }", undefined, [{a,321}]}
+  {"if (2 < 1) { a = 123 } else { a = 321 }", undefined, [{a,321}]},
+  {"typeof(1)", "number", []},
+  {"typeof('foo')", "string", []},
+  {"typeof(a)", "undefined", []},
+  {"typeof(true)", "boolean", []},
+  {"typeof(false)", "boolean", []},
+  {"typeof(null)", "object", []}
 ].
 
 js_test_() ->
