@@ -39,6 +39,20 @@ js_test_() ->
     fun() ->
       {Value, State} = erjs:eval(Code),
       ?assertEqual(ExpectedValue, Value),
-      ?assertEqual(ExpectedState, lists:sort(dict:to_list(State)))
+      ?assertEqual(ExpectedState, lists:sort(erjs_object:to_list(State)))
     end
   || {Code, ExpectedValue, ExpectedState} <- cases()].
+
+global_new_empty_test() ->
+  Global = erjs_object:new(),
+  ?assertEqual([], erjs_object:to_list(Global)).
+
+global_new_test() ->
+  Global = erjs_object:new([{a, 1}, {b, 2}]),
+  ?assertEqual([{a, 1}, {b, 2}], lists:sort(erjs_object:to_list(Global))).
+
+global_eval_test() ->
+  Global = erjs_object:new([{a, 5}]),
+  {_, Global2} = erjs:eval("a += 5", Global),
+  ?assertEqual([{a, 10}], erjs_object:to_list(Global2)).
+

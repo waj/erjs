@@ -12,15 +12,12 @@ run({identifier, _, false}, C) -> {false, C};
 run({identifier, _, null}, C) -> {null, C};
 
 run({identifier, _, Name}, C) ->
-  Value = case dict:find(Name, C) of
-    {ok, X} -> X;
-    _ -> undefined
-  end,
+  Value = erjs_object:get(Name, C),
   {Value, C};
 
 run({assign, {'=', _}, {identifier, _, Name}, Exp}, C) ->
   {Value, C2} = run(Exp, C),
-  C3 = dict:store(Name, Value, C2),
+  C3 = erjs_object:set(Name, Value, C2),
   {Value, C3};
 
 run({assign, {'+=', N}, Target, Exp}, C) ->
