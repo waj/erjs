@@ -67,14 +67,8 @@ run({string, _, Value}, C) -> {Value, C}.
 
 op('+', V1, V2) when is_list(V1) -> V1 ++ to_list(V2);
 op('+', V1, V2) when is_list(V2) -> to_list(V1) ++ V2;
-
 op('+', V1, V2) -> V1 + V2;
-op('<', V1, V2) -> V1 < V2;
-op('<=', V1, V2) -> V1 =< V2;
-op('>', V1, V2) -> V1 > V2;
-op('>=', V1, V2) -> V1 >= V2;
-op('==', V1, V2) -> V1 == V2;
-op('!=', V1, V2) -> V1 /= V2;
+
 op('&&', V1, V2) ->
   case to_bool(V1) of
     true -> V2;
@@ -84,7 +78,35 @@ op('||', V1, V2) ->
   case to_bool(V1) of
     true -> V1;
     _ -> V2
+  end;
+
+op(Op, V1, V2) ->
+  {X1, X2} = convert_for_comp(V1, V2, false),
+  case Op of
+    '<' -> X1 < X2;
+    '<=' -> X1 =< X2;
+    '>' -> X1 > X2;
+    '>=' -> X1 >= X2;
+    '==' -> X1 == X2;
+    '!=' -> X1 /= X2;
+    _ -> throw({badop, Op})
   end.
+
+convert_for_comp(V1, V2, S) when is_list(V1), is_integer(V2) ->
+  N = try list_to_integer(V1)  of
+    X -> X
+  catch
+    _:_ -> V1
+  end,
+  set_for_comp(N, V2, S);
+
+convert_for_comp(V1, V2, false) ->
+  convert_for_comp(V2, V1, true);
+
+convert_for_comp(V1, V2, true) -> {V2, V1}.
+
+set_for_comp(V1, V2, false) -> {V1, V2};
+set_for_comp(V1, V2, true) -> {V2, V1}.
 
 to_list(X) when is_list(X) -> X;
 to_list(X) when is_integer(X) -> integer_to_list(X).

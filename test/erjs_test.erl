@@ -34,7 +34,10 @@ cases() -> [
   {"typeof(null)", "object", []},
   {"true && true", true, []},
   {"null && 123", null, []},
-  {"false || true", true, []}
+  {"false || true", true, []},
+  {"'1' == 1", true, []},
+  {"1 == '1'", true, []},
+  {"'5' < 10", true, []}
 ].
 
 js_test_() ->
