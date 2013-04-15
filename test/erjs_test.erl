@@ -31,7 +31,10 @@ cases() -> [
   {"typeof(a)", "undefined", []},
   {"typeof(true)", "boolean", []},
   {"typeof(false)", "boolean", []},
-  {"typeof(null)", "object", []}
+  {"typeof(null)", "object", []},
+  {"true && true", true, []},
+  {"null && 123", null, []},
+  {"false || true", true, []}
 ].
 
 js_test_() ->

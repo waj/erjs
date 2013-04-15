@@ -74,7 +74,17 @@ op('<=', V1, V2) -> V1 =< V2;
 op('>', V1, V2) -> V1 > V2;
 op('>=', V1, V2) -> V1 >= V2;
 op('==', V1, V2) -> V1 == V2;
-op('!=', V1, V2) -> V1 /= V2.
+op('!=', V1, V2) -> V1 /= V2;
+op('&&', V1, V2) ->
+  case to_bool(V1) of
+    true -> V2;
+    _ -> V1
+  end;
+op('||', V1, V2) ->
+  case to_bool(V1) of
+    true -> V1;
+    _ -> V2
+  end.
 
 to_list(X) when is_list(X) -> X;
 to_list(X) when is_integer(X) -> integer_to_list(X).
