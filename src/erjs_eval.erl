@@ -63,12 +63,17 @@ run({ifelse, Expr, Then, Else}, C) ->
   {undefined, C2};
 
 run({apply, {identifier, _, Name}, {'(', Exps}}, C) ->
-  Fun = erjs_object:get(Name, C),
   {Args, C2} = lists:foldl(fun(Exp, {AIn, CIn}) ->
     {A, COut} = run(Exp, CIn),
     {AIn ++ [A], COut}
   end, {[], C}, Exps),
-  {erlang:apply(Fun, Args), C2};
+
+  case erjs_object:get(Name, C) of
+    undefined ->
+      erjs_builtins:run(Name, Args, C);
+    Fun ->
+      {erlang:apply(Fun, Args), C2}
+  end;
 
 run({integer, _, Value}, C) -> {Value, C};
 run({float, _, Value}, C) -> {Value, C};

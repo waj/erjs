@@ -41,7 +41,9 @@ cases() -> [
   {"false || true", true, []},
   {"'1' == 1", true, []},
   {"1 == '1'", true, []},
-  {"'5' < 10", true, []}
+  {"'5' < 10", true, []},
+  {"parseInt('123')", 123, []},
+  {"parseFloat('2.5')", 2.5, []}
 ].
 
 cases_with_state() -> [
