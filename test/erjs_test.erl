@@ -8,7 +8,10 @@ cases() -> [
   {"a = 1; b = 2", 2, [{a, 1}, {b, 2}]},
   {"a = 1; b = 2; a + b", 3, [{a, 1}, {b, 2}]},
   {"2 + 3", 5, []},
+  {"2 - 3", -1, []},
   {"2+3", 5, []},
+  {"2.5", 2.5, []},
+  {"1.2 + 2.3", 3.5, []},
   {"a = 1; a += 2; a", 3, [{a, 3}]},
   {"true", true, []},
   {"false", false, []},
@@ -42,12 +45,12 @@ cases() -> [
 ].
 
 js_test_() ->
-  [
+  [{Code,
     fun() ->
       {Value, State} = erjs:eval(Code),
       ?assertEqual(ExpectedValue, Value),
       ?assertEqual(ExpectedState, lists:sort(erjs_object:to_list(State)))
-    end
+    end}
   || {Code, ExpectedValue, ExpectedState} <- cases()].
 
 global_new_empty_test() ->
