@@ -12,3 +12,5 @@ deps:
 
 run:
 	erl -pa ebin/ deps/*/ebin
+
+.PHONY: deps
