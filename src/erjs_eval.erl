@@ -45,6 +45,7 @@ run({op, {typeof, _}, Expr}, C) ->
     undefined -> "undefined";
     _ when is_number(Value) -> "number";
     _ when is_list(Value) -> "string";
+    _ when is_function(Value) -> "function";
     _ -> "object"
   end,
   {Type, C1};
@@ -61,6 +62,13 @@ run({ifelse, Expr, Then, Else}, C) ->
   {_, C2} = run(Next, C1),
   {undefined, C2};
 
+run({apply, {identifier, _, Name}, {'(', Exps}}, C) ->
+  Fun = erjs_object:get(Name, C),
+  {Args, C2} = lists:foldl(fun(Exp, {AIn, CIn}) ->
+    {A, COut} = run(Exp, CIn),
+    {AIn ++ [A], COut}
+  end, {[], C}, Exps),
+  {erlang:apply(Fun, Args), C2};
 
 run({integer, _, Value}, C) -> {Value, C};
 run({float, _, Value}, C) -> {Value, C};

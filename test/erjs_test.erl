@@ -44,6 +44,13 @@ cases() -> [
   {"'5' < 10", true, []}
 ].
 
+cases_with_state() -> [
+  {[{foo, fun() -> 123 end}], "foo()", 123, []},
+  {[{foo, fun(A, B) -> A + B end}], "foo(4, 5)", 9, []},
+  {[{foo, fun(A, B) -> A + B end}], "foo(a = 4, b = 5)", 9, [{a, 4}, {b, 5}]},
+  {[{foo, fun() -> ok end}], "typeof(foo)", "function", []}
+].
+
 js_test_() ->
   [{Code,
     fun() ->
@@ -52,6 +59,20 @@ js_test_() ->
       ?assertEqual(ExpectedState, lists:sort(erjs_object:to_list(State)))
     end}
   || {Code, ExpectedValue, ExpectedState} <- cases()].
+
+js_with_state_test_() ->
+  [{Code,
+    fun() ->
+      Global = erjs_object:new(Initial),
+      {Value, State} = erjs:eval(Code, Global),
+      ?assertEqual(ExpectedValue, Value),
+      ?assertEqual(ExpectedState, lists:sort(remove_functions(erjs_object:to_list(State))))
+    end}
+  || {Initial, Code, ExpectedValue, ExpectedState} <- cases_with_state()].
+
+remove_functions([]) -> [];
+remove_functions([{_, Value} | Rest]) when is_function(Value) -> remove_functions(Rest);
+remove_functions([Item | Rest]) -> [Item | remove_functions(Rest)].
 
 global_new_empty_test() ->
   Global = erjs_object:new(),
