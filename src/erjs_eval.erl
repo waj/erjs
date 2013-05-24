@@ -83,6 +83,7 @@ op('+', V1, V2) when is_list(V1) -> V1 ++ to_list(V2);
 op('+', V1, V2) when is_list(V2) -> to_list(V1) ++ V2;
 op('+', V1, V2) -> V1 + V2;
 op('-', V1, V2) -> V1 - V2;
+op('*', V1, V2) -> V1 * V2;
 
 op('&&', V1, V2) ->
   case to_bool(V1) of
