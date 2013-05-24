@@ -24,6 +24,17 @@ run({assign, {'+=', N}, Target, Exp}, C) ->
   Value = {op, {'+', N}, Target, Exp},
   run({assign, {'=', N}, Target, Value}, C);
 
+run({new, {identifier, _, 'Date'}, {'(', Exps}}, C) ->
+  {Args, C2} = run_args(Exps, C),
+  {erjs_builtins:datetime_new(Args), C2};
+
+run({{Expr, [Method]}, {'(', []}}, C) ->
+  {Obj, C2} = run(Expr, C),
+  case is_datetime(Obj) of
+    true -> {erjs_builtins:datetime_invoke(Obj, Method), C2};
+    false -> throw(undefined)
+  end;
+
 run({op, {Op, _}, E1, E2}, C) ->
   {V1, C1} = run(E1, C),
   {V2, C2} = run(E2, C1),
@@ -63,11 +74,7 @@ run({ifelse, Expr, Then, Else}, C) ->
   {undefined, C2};
 
 run({apply, {identifier, _, Name}, {'(', Exps}}, C) ->
-  {Args, C2} = lists:foldl(fun(Exp, {AIn, CIn}) ->
-    {A, COut} = run(Exp, CIn),
-    {AIn ++ [A], COut}
-  end, {[], C}, Exps),
-
+  {Args, C2} = run_args(Exps, C),
   case erjs_object:get(Name, C) of
     undefined ->
       erjs_builtins:run(Name, Args, C);
@@ -78,6 +85,12 @@ run({apply, {identifier, _, Name}, {'(', Exps}}, C) ->
 run({integer, _, Value}, C) -> {Value, C};
 run({float, _, Value}, C) -> {Value, C};
 run({string, _, Value}, C) -> {Value, C}.
+
+run_args(Args, C) ->
+  lists:foldl(fun(Exp, {AIn, CIn}) ->
+    {A, COut} = run(Exp, CIn),
+    {AIn ++ [A], COut}
+  end, {[], C}, Args).
 
 op('+', V1, V2) when is_list(V1) -> V1 ++ to_list(V2);
 op('+', V1, V2) when is_list(V2) -> to_list(V1) ++ V2;
@@ -131,3 +144,6 @@ to_bool(undefined) -> false;
 to_bool(null) -> false;
 to_bool(false) -> false;
 to_bool(_) -> true.
+
+is_datetime({{Y, M, D},{HH, MM, SS}}) when is_number(Y), is_number(M), is_number(D), is_number(HH), is_number(MM), is_number(SS) -> true;
+is_datetime(_) -> false.
