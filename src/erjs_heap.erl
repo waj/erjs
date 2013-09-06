@@ -1,5 +1,5 @@
 -module(erjs_heap).
--export([new/0, new_object/1, set_object_field/4, get_object_field/3, get_object_as_list/2, unset_object_field/3]).
+-export([new/0, new_object/1, set_object_field/4, get_object_field/3, get_object_as_list/3, unset_object_field/3]).
 
 new() ->
   dict:new().
@@ -14,15 +14,19 @@ set_object_field(Ref, Field, Value, Heap) ->
   NewObject = dict:store(Field, Value, Object),
   dict:store(Ref, NewObject, Heap).
 
-get_object_as_list(Ref, Heap) ->
+get_object_as_list(Ref, Heap, Deep) ->
   Object = dict:fetch(Ref, Heap),
   List = dict:to_list(Object),
-  [
-    if
-      is_reference(Value) -> {Field, get_object_as_list(Value, Heap)};
-      true -> {Field, Value}
-    end
-  || {Field, Value} <- List].
+  case Deep of
+    true ->
+      [
+        if
+          is_reference(Value) -> {Field, get_object_as_list(Value, Heap, true)};
+          true -> {Field, Value}
+        end
+      || {Field, Value} <- List];
+    _ -> List
+  end.
 
 get_object_field(Ref, Field, Heap) ->
   Object = dict:fetch(Ref, Heap),
