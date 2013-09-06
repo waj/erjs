@@ -16,7 +16,13 @@ set_object_field(Ref, Field, Value, Heap) ->
 
 get_object_as_list(Ref, Heap) ->
   Object = dict:fetch(Ref, Heap),
-  dict:to_list(Object).
+  List = dict:to_list(Object),
+  [
+    if
+      is_reference(Value) -> {Field, get_object_as_list(Value, Heap)};
+      true -> {Field, Value}
+    end
+  || {Field, Value} <- List].
 
 get_object_field(Ref, Field, Heap) ->
   Object = dict:fetch(Ref, Heap),

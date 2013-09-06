@@ -44,7 +44,10 @@ cases() -> [
   {"'5' < 10", true, []},
   {"parseInt('123')", 123, []},
   {"parseFloat('2.5')", 2.5, []},
-  {"5 * 4", 20, []}
+  {"5 * 4", 20, []},
+  {"foo = {}; typeof(foo)", "object", [{foo, []}]},
+  {"foo = {}; foo['x'] = 123", 123, [{foo, [{"x", 123}]}]},
+  {"foo = {}; foo['x'] = 123; foo['x']", 123, [{foo, [{"x", 123}]}]}
 ].
 
 cases_with_state() -> [
@@ -72,6 +75,16 @@ js_with_state_test_() ->
       ?assertEqual(ExpectedState, lists:sort(remove_functions(erjs_context:to_list(State))))
     end}
   || {Initial, Code, ExpectedValue, ExpectedState} <- cases_with_state()].
+
+hash_new_test() ->
+  {Value, State} = erjs:eval("foo = {}"),
+  ?assert(is_reference(Value)),
+  ?assertEqual(Value, erjs_context:get(foo, State)).
+
+object_new_test() ->
+  {Value, State} = erjs:eval("foo = new Object()"),
+  ?assert(is_reference(Value)),
+  ?assertEqual(Value, erjs_context:get(foo, State)).
 
 remove_functions([]) -> [];
 remove_functions([{_, Value} | Rest]) when is_function(Value) -> remove_functions(Rest);

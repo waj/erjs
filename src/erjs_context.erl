@@ -1,5 +1,5 @@
 -module(erjs_context).
--export([new/0, new/1, set/3, get/2, to_list/1, unset/2]).
+-export([new/0, new/1, set/3, set/4, get/2, get/3, to_list/1, unset/2, new_object/1]).
 
 new() ->
   Heap = erjs_heap:new(),
@@ -15,15 +15,25 @@ new([{Name, Value} | Rest], Context) ->
   new(Rest, NewContext).
 
 set(Name, Value, {Root, Heap}) ->
-  Heap2 = erjs_heap:set_object_field(Root, Name, Value, Heap),
+  set(Root, Name, Value, {Root, Heap}).
+
+set(Obj, Name, Value, {Root, Heap}) ->
+  Heap2 = erjs_heap:set_object_field(Obj, Name, Value, Heap),
   {Root, Heap2}.
 
 get(Name, {Root, Heap}) ->
-  erjs_heap:get_object_field(Root, Name, Heap).
+  get(Root, Name, {Root, Heap}).
+
+get(Obj, Name, {_Root, Heap}) ->
+  erjs_heap:get_object_field(Obj, Name, Heap).
 
 unset(Name, {Root, Heap}) ->
   Heap2 = erjs_heap:unset_object_field(Root, Name, Heap),
   {Root, Heap2}.
+
+new_object({Root, Heap}) ->
+  {Ref, Heap2} = erjs_heap:new_object(Heap),
+  {Ref, {Root, Heap2}}.
 
 to_list({Root, Heap}) ->
   erjs_heap:get_object_as_list(Root, Heap).

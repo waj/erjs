@@ -15,10 +15,23 @@ run({identifier, _, Name}, C) ->
   Value = erjs_context:get(Name, C),
   {Value, C};
 
+run({ObjExp, {'[]', FieldExp}}, C) ->
+  {Obj, C2} = run(ObjExp, C),
+  {Field, C3} = run(FieldExp, C2),
+  Value = erjs_context:get(Obj, Field, C3),
+  {Value, C3};
+
 run({assign, {'=', _}, {identifier, _, Name}, Exp}, C) ->
   {Value, C2} = run(Exp, C),
   C3 = erjs_context:set(Name, Value, C2),
   {Value, C3};
+
+run({assign, {'=', _}, {ObjExp, {'[]', FieldExp}}, ValueExp}, C) ->
+  {Obj, C2} = run(ObjExp, C),
+  {Field, C3} = run(FieldExp, C2),
+  {Value, C4} = run(ValueExp, C3),
+  C5 = erjs_context:set(Obj, Field, Value, C4),
+  {Value, C5};
 
 run({assign, {'+=', N}, Target, Exp}, C) ->
   Value = {op, {'+', N}, Target, Exp},
@@ -27,6 +40,12 @@ run({assign, {'+=', N}, Target, Exp}, C) ->
 run({new, {identifier, _, 'Date'}, {'(', Exps}}, C) ->
   {Args, C2} = run_args(Exps, C),
   {erjs_builtins:datetime_new(Args), C2};
+
+run({new, {identifier, _, 'Object'}, {'(', []}}, C) ->
+  erjs_context:new_object(C);
+
+run({'{', _}, C) ->
+  erjs_context:new_object(C);
 
 run({{Expr, [Method]}, {'(', []}}, C) ->
   {Obj, C2} = run(Expr, C),
