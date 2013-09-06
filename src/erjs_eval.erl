@@ -21,6 +21,11 @@ run({ObjExp, {'[]', FieldExp}}, C) ->
   Value = erjs_context:get(Obj, Field, C3),
   {Value, C3};
 
+run({ObjExp, [Field]}, C) ->
+  {Obj, C2} = run(ObjExp, C),
+  Value = erjs_context:get(Obj, Field, C2),
+  {Value, C2};
+
 run({assign, {'=', _}, {identifier, _, Name}, Exp}, C) ->
   {Value, C2} = run(Exp, C),
   C3 = erjs_context:set(Name, Value, C2),
@@ -32,6 +37,12 @@ run({assign, {'=', _}, {ObjExp, {'[]', FieldExp}}, ValueExp}, C) ->
   {Value, C4} = run(ValueExp, C3),
   C5 = erjs_context:set(Obj, Field, Value, C4),
   {Value, C5};
+
+run({assign, {'=', _}, {ObjExp, [Field]}, ValueExp}, C) ->
+  {Obj, C2} = run(ObjExp, C),
+  {Value, C3} = run(ValueExp, C2),
+  C4 = erjs_context:set(Obj, Field, Value, C3),
+  {Value, C4};
 
 run({assign, {'+=', N}, Target, Exp}, C) ->
   Value = {op, {'+', N}, Target, Exp},
