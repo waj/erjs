@@ -2,9 +2,9 @@
 -export([eval/1, eval/2]).
 
 eval(Data) ->
-  Global = erjs_object:new(),
-  eval(Data, Global).
+  Context = erjs_context:new(),
+  eval(Data, Context).
 
-eval(Data, Global) ->
+eval(Data, Context) ->
   {ok, Cmds} = erlyjs_compiler:parse(Data),
-  erjs_eval:run(Cmds, Global).
+  erjs_eval:run(Cmds, Context).

@@ -12,12 +12,12 @@ run({identifier, _, false}, C) -> {false, C};
 run({identifier, _, null}, C) -> {null, C};
 
 run({identifier, _, Name}, C) ->
-  Value = erjs_object:get(Name, C),
+  Value = erjs_context:get(Name, C),
   {Value, C};
 
 run({assign, {'=', _}, {identifier, _, Name}, Exp}, C) ->
   {Value, C2} = run(Exp, C),
-  C3 = erjs_object:set(Name, Value, C2),
+  C3 = erjs_context:set(Name, Value, C2),
   {Value, C3};
 
 run({assign, {'+=', N}, Target, Exp}, C) ->
@@ -75,9 +75,9 @@ run({ifelse, Expr, Then, Else}, C) ->
 
 run({apply, {identifier, _, Name}, {'(', Exps}}, C) ->
   {Args, C2} = run_args(Exps, C),
-  case erjs_object:get(Name, C) of
+  case erjs_context:get(Name, C2) of
     undefined ->
-      erjs_builtins:run(Name, Args, C);
+      erjs_builtins:run(Name, Args, C2);
     Fun ->
       {erlang:apply(Fun, Args), C2}
   end;

@@ -59,17 +59,17 @@ js_test_() ->
     fun() ->
       {Value, State} = erjs:eval(Code),
       ?assertEqual(ExpectedValue, Value),
-      ?assertEqual(ExpectedState, lists:sort(erjs_object:to_list(State)))
+      ?assertEqual(ExpectedState, lists:sort(erjs_context:to_list(State)))
     end}
   || {Code, ExpectedValue, ExpectedState} <- cases()].
 
 js_with_state_test_() ->
   [{Code,
     fun() ->
-      Global = erjs_object:new(Initial),
-      {Value, State} = erjs:eval(Code, Global),
+      Context = erjs_context:new(Initial),
+      {Value, State} = erjs:eval(Code, Context),
       ?assertEqual(ExpectedValue, Value),
-      ?assertEqual(ExpectedState, lists:sort(remove_functions(erjs_object:to_list(State))))
+      ?assertEqual(ExpectedState, lists:sort(remove_functions(erjs_context:to_list(State))))
     end}
   || {Initial, Code, ExpectedValue, ExpectedState} <- cases_with_state()].
 
@@ -77,27 +77,27 @@ remove_functions([]) -> [];
 remove_functions([{_, Value} | Rest]) when is_function(Value) -> remove_functions(Rest);
 remove_functions([Item | Rest]) -> [Item | remove_functions(Rest)].
 
-global_new_empty_test() ->
-  Global = erjs_object:new(),
-  ?assertEqual([], erjs_object:to_list(Global)).
+context_new_empty_test() ->
+  Context = erjs_context:new(),
+  ?assertEqual([], erjs_context:to_list(Context)).
 
-global_new_test() ->
-  Global = erjs_object:new([{a, 1}, {b, 2}]),
-  ?assertEqual([{a, 1}, {b, 2}], lists:sort(erjs_object:to_list(Global))).
+context_new_test() ->
+  Context = erjs_context:new([{a, 1}, {b, 2}]),
+  ?assertEqual([{a, 1}, {b, 2}], lists:sort(erjs_context:to_list(Context))).
 
-global_eval_test() ->
-  Global = erjs_object:new([{a, 5}]),
-  {_, Global2} = erjs:eval("a += 5", Global),
-  ?assertEqual([{a, 10}], erjs_object:to_list(Global2)).
+context_eval_test() ->
+  Context = erjs_context:new([{a, 5}]),
+  {_, Context2} = erjs:eval("a += 5", Context),
+  ?assertEqual([{a, 10}], erjs_context:to_list(Context2)).
 
-global_unset_test() ->
-  Global = erjs_object:new([{a, 1}, {b, 2}]),
-  Global2 = erjs_object:unset(a, Global),
-  Global3 = erjs_object:unset(c, Global2),
-  ?assertEqual([{b, 2}], erjs_object:to_list(Global3)).
+context_unset_test() ->
+  Context = erjs_context:new([{a, 1}, {b, 2}]),
+  Context2 = erjs_context:unset(a, Context),
+  Context3 = erjs_context:unset(c, Context2),
+  ?assertEqual([{b, 2}], erjs_context:to_list(Context3)).
 
-global_unset_many_test() ->
-  Global = erjs_object:new([{a, 1}, {b, 2}, {c, 3}]),
-  Global2 = erjs_object:unset([a, b], Global),
-  ?assertEqual([{c, 3}], erjs_object:to_list(Global2)).
+context_unset_many_test() ->
+  Context = erjs_context:new([{a, 1}, {b, 2}, {c, 3}]),
+  Context2 = erjs_context:unset([a, b], Context),
+  ?assertEqual([{c, 3}], erjs_context:to_list(Context2)).
 
