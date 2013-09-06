@@ -4,15 +4,15 @@
 cases() -> [
   {"123", 123, []},
   {"foo", undefined, []},
-  {"a = 123", 123, [{a, 123}]},
-  {"a = 1; b = 2", 2, [{a, 1}, {b, 2}]},
-  {"a = 1; b = 2; a + b", 3, [{a, 1}, {b, 2}]},
+  {"a = 123", 123, [{<<"a">>, 123}]},
+  {"a = 1; b = 2", 2, [{<<"a">>, 1}, {<<"b">>, 2}]},
+  {"a = 1; b = 2; a + b", 3, [{<<"a">>, 1}, {<<"b">>, 2}]},
   {"2 + 3", 5, []},
   {"2 - 3", -1, []},
   {"2+3", 5, []},
   {"2.5", 2.5, []},
   {"1.2 + 2.3", 3.5, []},
-  {"a = 1; a += 2; a", 3, [{a, 3}]},
+  {"a = 1; a += 2; a", 3, [{<<"a">>, 3}]},
   {"true", true, []},
   {"false", false, []},
   {"null", null, []},
@@ -26,10 +26,10 @@ cases() -> [
   {"1 + 'hello'", "1hello", []},
   {"1 < 2 ? 3 : 4", 3, []},
   {"foo ? foo : 1", 1, []},
-  {"foo = 1; foo ? foo : 2", 1, [{foo, 1}]},
+  {"foo = 1; foo ? foo : 2", 1, [{<<"foo">>, 1}]},
   {"if (1 > 2) { a = 123 }", undefined, []},
-  {"if (1 < 2) { a = 123 }", undefined, [{a,123}]},
-  {"if (2 < 1) { a = 123 } else { a = 321 }", undefined, [{a,321}]},
+  {"if (1 < 2) { a = 123 }", undefined, [{<<"a">>,123}]},
+  {"if (2 < 1) { a = 123 } else { a = 321 }", undefined, [{<<"a">>,321}]},
   {"typeof(1)", "number", []},
   {"typeof('foo')", "string", []},
   {"typeof(a)", "undefined", []},
@@ -45,17 +45,18 @@ cases() -> [
   {"parseInt('123')", 123, []},
   {"parseFloat('2.5')", 2.5, []},
   {"5 * 4", 20, []},
-  {"foo = {}; typeof(foo)", "object", [{foo, []}]},
-  {"foo = {}; foo['x'] = 123", 123, [{foo, [{"x", 123}]}]},
-  {"foo = {}; foo['x'] = 123; foo['x']", 123, [{foo, [{"x", 123}]}]},
-  {"foo = {}; foo.x = 123", 123, [{foo, [{x, 123}]}]},
-  {"foo = {}; foo.x = 123; foo.x", 123, [{foo, [{x, 123}]}]}
+  {"foo = {}; typeof(foo)", "object", [{<<"foo">>, []}]},
+  {"foo = {}; foo['x'] = 123", 123, [{<<"foo">>, [{<<"x">>, 123}]}]},
+  {"foo = {}; foo['x'] = 123; foo['x']", 123, [{<<"foo">>, [{<<"x">>, 123}]}]},
+  {"foo = {}; foo.x = 123", 123, [{<<"foo">>, [{<<"x">>, 123}]}]},
+  {"foo = {}; foo.x = 123; foo.x", 123, [{<<"foo">>, [{<<"x">>, 123}]}]},
+  {"foo = {}; foo.x = 123; foo['x']", 123, [{<<"foo">>, [{<<"x">>, 123}]}]}
 ].
 
 cases_with_state() -> [
   {[{foo, fun() -> 123 end}], "foo()", 123, []},
   {[{foo, fun(A, B) -> A + B end}], "foo(4, 5)", 9, []},
-  {[{foo, fun(A, B) -> A + B end}], "foo(a = 4, b = 5)", 9, [{a, 4}, {b, 5}]},
+  {[{foo, fun(A, B) -> A + B end}], "foo(a = 4, b = 5)", 9, [{<<"a">>, 4}, {<<"b">>, 5}]},
   {[{foo, fun() -> ok end}], "typeof(foo)", "function", []}
 ].
 
@@ -98,21 +99,20 @@ context_new_empty_test() ->
 
 context_new_test() ->
   Context = erjs_context:new([{a, 1}, {b, 2}]),
-  ?assertEqual([{a, 1}, {b, 2}], lists:sort(erjs_context:to_list(Context))).
+  ?assertEqual([{<<"a">>, 1}, {<<"b">>, 2}], lists:sort(erjs_context:to_list(Context))).
 
 context_eval_test() ->
   Context = erjs_context:new([{a, 5}]),
   {_, Context2} = erjs:eval("a += 5", Context),
-  ?assertEqual([{a, 10}], erjs_context:to_list(Context2)).
+  ?assertEqual([{<<"a">>, 10}], erjs_context:to_list(Context2)).
 
 context_unset_test() ->
   Context = erjs_context:new([{a, 1}, {b, 2}]),
   Context2 = erjs_context:unset(a, Context),
   Context3 = erjs_context:unset(c, Context2),
-  ?assertEqual([{b, 2}], erjs_context:to_list(Context3)).
+  ?assertEqual([{<<"b">>, 2}], erjs_context:to_list(Context3)).
 
 context_unset_many_test() ->
   Context = erjs_context:new([{a, 1}, {b, 2}, {c, 3}]),
   Context2 = erjs_context:unset([a, b], Context),
-  ?assertEqual([{c, 3}], erjs_context:to_list(Context2)).
-
+  ?assertEqual([{<<"c">>, 3}], erjs_context:to_list(Context2)).

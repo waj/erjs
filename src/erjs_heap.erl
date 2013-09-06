@@ -11,7 +11,7 @@ new_object(Heap) ->
 
 set_object_field(Ref, Field, Value, Heap) ->
   Object = dict:fetch(Ref, Heap),
-  NewObject = dict:store(Field, Value, Object),
+  NewObject = dict:store(to_binary(Field), Value, Object),
   dict:store(Ref, NewObject, Heap).
 
 get_object_as_list(Ref, Heap, Deep) ->
@@ -30,7 +30,7 @@ get_object_as_list(Ref, Heap, Deep) ->
 
 get_object_field(Ref, Field, Heap) ->
   Object = dict:fetch(Ref, Heap),
-  case dict:find(Field, Object) of
+  case dict:find(to_binary(Field), Object) of
     {ok, Value} -> Value;
     _ -> undefined
   end.
@@ -44,5 +44,8 @@ unset([], Object) -> Object;
 unset([Name | Rest], Object) ->
   unset(Rest, unset(Name, Object));
 unset(Name, Object) ->
-  dict:erase(Name, Object).
+  dict:erase(to_binary(Name), Object).
 
+to_binary(Name) when is_binary(Name) -> Name;
+to_binary(Name) when is_atom(Name) -> atom_to_binary(Name, utf8);
+to_binary(Name) when is_list(Name) -> iolist_to_binary(Name).
