@@ -12,7 +12,11 @@ run({identifier, _, false}, C) -> {false, C};
 run({identifier, _, null}, C) -> {null, C};
 
 run({identifier, _, Name}, C) ->
-  Value = erjs_context:get(Name, C),
+  GetVar = erjs_context:get('_get_var', C),
+  Value = case GetVar of
+    undefined -> erjs_context:get(Name, C);
+    _ -> GetVar(Name, C)
+  end,
   {Value, C};
 
 run({ObjExp, {'[]', FieldExp}}, C) ->
