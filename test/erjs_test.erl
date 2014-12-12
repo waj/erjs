@@ -116,3 +116,8 @@ context_unset_many_test() ->
   Context = erjs_context:new([{a, 1}, {b, 2}, {c, 3}]),
   Context2 = erjs_context:unset([a, b], Context),
   ?assertEqual([{<<"c">>, 3}], erjs_context:to_list(Context2)).
+
+context_object_to_list_test() ->
+  {Obj, Context} = erjs:eval("obj = {}; obj['foo'] = 1; obj"),
+  ObjList = erjs_context:to_list(Obj, Context),
+  ?assertEqual([{<<"foo">>, 1}], ObjList).
